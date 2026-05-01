@@ -1,0 +1,30 @@
+Options -Indexes
+
+# Block direct access to vendor folder
+<IfModule mod_rewrite.c>
+RewriteRule ^vendor/ - [F,L]
+</IfModule>
+
+RewriteEngine On
+
+# Sitemap route
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
+# Remove .php extension from URLs (Root files)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+# Route to services folder if file exists there
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/new-logixcode/services/$1.php -f
+RewriteRule ^([^\.]+)$ services/$1.php [NC,L]
+
+# Route to blog folder if file exists there
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/new-logixcode/blog/$1.php -f
+RewriteRule ^([^\.]+)$ blog/$1.php [NC,L]
+
+# Redirect .php URLs to clean URLs (avoid duplicate content)
+RewriteCond %{THE_REQUEST} /([^.]+)\.php [NC]
+RewriteRule ^ /%1 [NC,L,R=301]
