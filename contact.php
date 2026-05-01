@@ -77,9 +77,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->SMTPAuth    = true;
             $mail->Username    = MAIL_USERNAME;
             $mail->Password    = MAIL_PASSWORD;
-            $mail->SMTPSecure  = PHPMailer::ENCRYPTION_SMTPS; // SSL on port 465
+            $mail->SMTPSecure  = (MAIL_PORT == 465) ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port        = MAIL_PORT;
             $mail->CharSet     = 'UTF-8';
+
 
             // Workaround for Hostinger/Shared Hosting SSL peer verification
             $mail->SMTPOptions = [
@@ -142,14 +143,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ── AUTO-REPLY TO CUSTOMER ───────────────────────────────────────
             $autoReply = new PHPMailer(true);
             try {
-                 $autoReply->isSMTP();
-                 $autoReply->Host        = MAIL_HOST;
-                 $autoReply->SMTPAuth    = true;
-                 $autoReply->Username    = MAIL_USERNAME;
-                 $autoReply->Password    = MAIL_PASSWORD;
-                 $autoReply->SMTPSecure  = PHPMailer::ENCRYPTION_SMTPS;
-                 $autoReply->Port        = MAIL_PORT;
-                 $autoReply->CharSet     = 'UTF-8';
+                  $autoReply->isSMTP();
+                  $autoReply->Host        = MAIL_HOST;
+                  $autoReply->SMTPAuth    = true;
+                  $autoReply->Username    = MAIL_USERNAME;
+                  $autoReply->Password    = MAIL_PASSWORD;
+                  $autoReply->SMTPSecure  = (MAIL_PORT == 465) ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+                  $autoReply->Port        = MAIL_PORT;
+                  $autoReply->CharSet     = 'UTF-8';
+
 
                  // Workaround for Hostinger/Shared Hosting SSL peer verification
                  $autoReply->SMTPOptions = [
