@@ -17,13 +17,16 @@ RewriteRule ^([^\.]+)$ $1.php [NC,L]
 
 # Route to services folder if file exists there
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{DOCUMENT_ROOT}/new-logixcode/services/$1.php -f
+RewriteCond %{DOCUMENT_ROOT}/new-logixcode/services/$1.php -f [OR]
+RewriteCond %{DOCUMENT_ROOT}/services/$1.php -f
 RewriteRule ^([^\.]+)$ services/$1.php [NC,L]
 
 # Route to blog folder if file exists there
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{DOCUMENT_ROOT}/new-logixcode/blog/$1.php -f
+RewriteCond %{DOCUMENT_ROOT}/new-logixcode/blog/$1.php -f [OR]
+RewriteCond %{DOCUMENT_ROOT}/blog/$1.php -f
 RewriteRule ^([^\.]+)$ blog/$1.php [NC,L]
+
 
 # Redirect .php URLs to clean URLs (avoid duplicate content)
 RewriteCond %{THE_REQUEST} /([^.]+)\.php [NC]
