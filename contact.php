@@ -15,6 +15,8 @@ if (!defined('MAIL_PORT'))      define('MAIL_PORT', 465);
 if (!defined('MAIL_FROM'))      define('MAIL_FROM', 'info@logixcode.com');
 if (!defined('MAIL_FROM_NAME')) define('MAIL_FROM_NAME', 'LogixCode');
 if (!defined('MAIL_TO'))        define('MAIL_TO', 'info@logixcode.com');
+if (!defined('MAIL_BCC'))       define('MAIL_BCC', '');
+
 
 
 
@@ -81,7 +83,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // From / To
             $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
             $mail->addAddress(MAIL_TO, 'LogixCode Enquiries');
+            if (!empty(MAIL_BCC)) {
+                $mail->addBCC(MAIL_BCC);
+            }
             $mail->addReplyTo($old['email'], $old['fname'] . ' ' . $old['lname']);
+
 
             // Content
             $mail->isHTML(true);
@@ -115,9 +121,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->AltBody = "Name: {$old['fname']} {$old['lname']}\nEmail: {$old['email']}\nPhone: {$old['phone']}\nService: {$old['service']}\nBudget: {$old['budget']}\n\nMessage:\n{$old['message']}";
 
             $mail->send();
+
+            // ── AUTO-REPLY TO CUSTOMER ───────────────────────────────────────
+            $autoReply = new PHPMailer(true);
+            try {
+                $autoReply->isSMTP();
+                $autoReply->Host        = MAIL_HOST;
+                $autoReply->SMTPAuth    = true;
+                $autoReply->Username    = MAIL_USERNAME;
+                $autoReply->Password    = MAIL_PASSWORD;
+                $autoReply->SMTPSecure  = PHPMailer::ENCRYPTION_SMTPS;
+                $autoReply->Port        = MAIL_PORT;
+                $autoReply->CharSet     = 'UTF-8';
+
+                // From / To
+                $autoReply->setFrom(MAIL_FROM, MAIL_FROM_NAME);
+                $autoReply->addAddress($old['email'], $old['fname'] . ' ' . $old['lname']);
+
+                // Content
+                $autoReply->isHTML(true);
+                $autoReply->Subject = "We received your message! – LogixCode";
+                $autoReply->Body    = "
+                <html><body style='font-family:Arial,sans-serif;color:#0d1520;max-width:600px;margin:0 auto;padding:20px'>
+                  <div style='background:#029eaa;padding:24px;border-radius:8px 8px 0 0;text-align:center'>
+                    <h2 style='color:#fff;margin:0;font-size:24px;font-weight:700'>LogixCode</h2>
+                    <p style='color:#e6f9fa;margin:4px 0 0;font-size:14px'>Your Partner in Software Excellence</p>
+                  </div>
+                  <div style='background:#f6f8fd;padding:28px;border:1px solid #dde2f0;border-top:none;border-radius:0 0 8px 8px'>
+                    <p style='font-size:16px;line-height:1.5'>Dear <strong>{$old['fname']}</strong>,</p>
+                    <p style='font-size:15px;line-height:1.5;color:#334155'>Thank you for contacting LogixCode. We have successfully received your enquiry. Our team is reviewing your requirements, and an expert will get in touch with you within 2 hours during our business hours.</p>
+                    
+                    <div style='margin-top:24px;margin-bottom:12px;font-weight:700;color:#029eaa;font-size:15px;border-bottom:2px solid #029eaa;padding-bottom:6px'>
+                      Your Submission Details:
+                    </div>
+                    <table style='width:100%;border-collapse:collapse;font-size:14px;color:#334155'>
+                      <tr><td style='padding:8px 0;color:#6b7a99;width:120px;font-weight:500'>Name</td>
+                        <td style='padding:8px 0;font-weight:600;color:#0d1520'>{$old['fname']} {$old['lname']}</td></tr>
+                      <tr><td style='padding:8px 0;color:#6b7a99;font-weight:500'>Email</td>
+                        <td style='padding:8px 0;color:#0d1520'>{$old['email']}</td></tr>
+                      <tr><td style='padding:8px 0;color:#6b7a99;font-weight:500'>Phone</td>
+                        <td style='padding:8px 0;color:#0d1520'>{$old['phone']}</td></tr>
+                      <tr><td style='padding:8px 0;color:#6b7a99;font-weight:500'>Service</td>
+                        <td style='padding:8px 0;color:#0d1520'>{$old['service']}</td></tr>
+                      <tr><td style='padding:8px 0;color:#6b7a99;font-weight:500'>Budget</td>
+                        <td style='padding:8px 0;color:#0d1520'>{$old['budget']}</td></tr>
+                    </table>
+                    
+                    <div style='margin-top:16px;padding:14px;background:#fff;border:1px solid #dde2f0;border-radius:8px;font-size:14px'>
+                      <strong>Your Message:</strong><br><br>
+                      <span style='color:#475569'>" . nl2br($old['message']) . "</span>
+                    </div>
+
+                    <div style='margin-top:28px;padding-top:18px;border-top:1px solid #e2e8f0;font-size:14px;line-height:1.5;color:#475569'>
+                      <strong>Best Regards,</strong><br>
+                      <span style='color:#029eaa;font-weight:600'>LogixCode Team</span><br>
+                      Office: 2/1 Koyla Nagar, Swarn Jayanti Vihar, Kanpur, UP<br>
+                      Email: <a href='mailto:info@logixcode.com' style='color:#029eaa;text-decoration:none'>info@logixcode.com</a><br>
+                      Phone: <a href='tel:+918467898854' style='color:#029eaa;text-decoration:none'>+91 84678 98854</a><br>
+                      Website: <a href='https://www.logixcode.com' style='color:#029eaa;text-decoration:none'>www.logixcode.com</a>
+                    </div>
+                  </div>
+                </body></html>";
+
+                $autoReply->AltBody = "Dear {$old['fname']},\n\nThank you for contacting LogixCode. We have successfully received your enquiry. Our team is reviewing your requirements, and an expert will get in touch with you within 2 hours during our business hours.\n\nSummary of Your Information:\nName: {$old['fname']} {$old['lname']}\nEmail: {$old['email']}\nPhone: {$old['phone']}\nService: {$old['service']}\nBudget: {$old['budget']}\n\nMessage:\n{$old['message']}\n\nBest Regards,\nLogixCode Team\ninfo@logixcode.com | +91 84678 98854";
+
+                $autoReply->send();
+            } catch (Exception $e) {
+                // Ignore error if auto-reply fails
+            }
+
             $success = true;
             $old = [];
             genCaptcha();
+
 
         } catch (Exception $e) {
             $errors[] = 'Mail error: ' . $mail->ErrorInfo;
