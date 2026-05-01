@@ -71,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail = new PHPMailer(true);
             try {
             // Server
+
             $mail->isSMTP();
             $mail->Host        = MAIL_HOST;
             $mail->SMTPAuth    = true;
@@ -79,6 +80,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->SMTPSecure  = PHPMailer::ENCRYPTION_SMTPS; // SSL on port 465
             $mail->Port        = MAIL_PORT;
             $mail->CharSet     = 'UTF-8';
+
+            // Workaround for Hostinger/Shared Hosting SSL peer verification
+            $mail->SMTPOptions = [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true
+                ]
+            ];
+
+            // Enable debug logging for live server troubleshooting
+            $mail->SMTPDebug = 2;
+            $mail->Debugoutput = function($str, $level) {
+                file_put_contents(__DIR__ . '/includes/mail_debug.log', $str, FILE_APPEND);
+            };
+
 
             // From / To
             $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
@@ -125,14 +142,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ── AUTO-REPLY TO CUSTOMER ───────────────────────────────────────
             $autoReply = new PHPMailer(true);
             try {
-                $autoReply->isSMTP();
-                $autoReply->Host        = MAIL_HOST;
-                $autoReply->SMTPAuth    = true;
-                $autoReply->Username    = MAIL_USERNAME;
-                $autoReply->Password    = MAIL_PASSWORD;
-                $autoReply->SMTPSecure  = PHPMailer::ENCRYPTION_SMTPS;
-                $autoReply->Port        = MAIL_PORT;
-                $autoReply->CharSet     = 'UTF-8';
+                 $autoReply->isSMTP();
+                 $autoReply->Host        = MAIL_HOST;
+                 $autoReply->SMTPAuth    = true;
+                 $autoReply->Username    = MAIL_USERNAME;
+                 $autoReply->Password    = MAIL_PASSWORD;
+                 $autoReply->SMTPSecure  = PHPMailer::ENCRYPTION_SMTPS;
+                 $autoReply->Port        = MAIL_PORT;
+                 $autoReply->CharSet     = 'UTF-8';
+
+                 // Workaround for Hostinger/Shared Hosting SSL peer verification
+                 $autoReply->SMTPOptions = [
+                     'ssl' => [
+                         'verify_peer' => false,
+                         'verify_peer_name' => false,
+                         'allow_self_signed' => true
+                     ]
+                 ];
+
+                 // Debug logging to troubleshoot live server
+                 $autoReply->SMTPDebug = 2;
+                 $autoReply->Debugoutput = function($str, $level) {
+                     file_put_contents(__DIR__ . '/includes/mail_debug.log', $str, FILE_APPEND);
+                 };
+
 
                 // From / To
                 $autoReply->setFrom(MAIL_FROM, MAIL_FROM_NAME);
