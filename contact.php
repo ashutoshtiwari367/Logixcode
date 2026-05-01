@@ -10,7 +10,7 @@ if (file_exists(__DIR__ . '/includes/mail-config.php')) {
 
 if (!defined('MAIL_HOST'))      define('MAIL_HOST', 'smtp.hostinger.com');
 if (!defined('MAIL_USERNAME'))  define('MAIL_USERNAME', 'info@logixcode.com');
-if (!defined('MAIL_PASSWORD'))  define('MAIL_PASSWORD', '');
+if (!defined('MAIL_PASSWORD'))  define('MAIL_PASSWORD', 'Mu$k@n1106');
 if (!defined('MAIL_PORT'))      define('MAIL_PORT', 465);
 if (!defined('MAIL_FROM'))      define('MAIL_FROM', 'info@logixcode.com');
 if (!defined('MAIL_FROM_NAME')) define('MAIL_FROM_NAME', 'LogixCode');
