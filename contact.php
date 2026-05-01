@@ -1,8 +1,13 @@
 <?php
 // ── BOOT ────────────────────────────────────────────────────────────────────
 session_start();
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/includes/mail-config.php';
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
+if (file_exists(__DIR__ . '/includes/mail-config.php')) {
+    require_once __DIR__ . '/includes/mail-config.php';
+}
+
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -47,9 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
 
-        // ── SEND WITH PHPMAILER ──────────────────────────────────────────
-        $mail = new PHPMailer(true);
-        try {
+        if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+            $errors[] = 'PHPMailer is not installed. Please run composer install or upload vendor folder.';
+        } else {
+            // ── SEND WITH PHPMAILER ──────────────────────────────────────────
+            $mail = new PHPMailer(true);
+            try {
             // Server
             $mail->isSMTP();
             $mail->Host        = MAIL_HOST;
@@ -104,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (Exception $e) {
             $errors[] = 'Mail error: ' . $mail->ErrorInfo;
         }
-
+       }
     } else {
         genCaptcha(); // Regenerate on any error
     }
@@ -151,7 +159,7 @@ $pageUrl   = "https://www.logixcode.com/contact";
     <div class="sp">Get In Touch</div>
     <h1>Contact <em>LogixCode</em></h1>
     <p>Have a project in mind? We'd love to hear about it. Reach out and we'll get back to you within 2 hours.</p>
-    <div class="pgh-bc"><a href="/new-logixcode/">Home</a> <span>›</span> <span>Contact</span></div>
+    <div class="pgh-bc"><a href="<?= $base_url ?>">Home</a> <span>›</span> <span>Contact</span></div>
   </div>
 </div>
 
@@ -177,7 +185,7 @@ $pageUrl   = "https://www.logixcode.com/contact";
       </div>
       <?php endif; ?>
 
-      <form method="POST" action="/new-logixcode/contact" novalidate>
+      <form method="POST" action="" novalidate>
 
         <div class="form-row">
           <div class="form-group">
